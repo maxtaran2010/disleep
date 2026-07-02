@@ -32,9 +32,10 @@ enum HUD {
         var target = NSPoint.zero
         if let screen = NSScreen.main {
             let f = screen.visibleFrame
+            // card has 28pt of transparent shadow padding; drop it ~44pt below the menu bar
             target = NSPoint(
                 x: f.midX - host.frame.width / 2,
-                y: f.maxY - host.frame.height + 8
+                y: f.maxY - host.frame.height - 16
             )
         }
 

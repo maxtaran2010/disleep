@@ -49,8 +49,8 @@ final class StatusPanelController {
         if let win = button.window {
             let anchor = win.convertToScreen(button.convert(button.bounds, to: nil))
             var x = anchor.midX - host.frame.width / 2
-            // chrome has 20pt of transparent shadow padding; land the card 14pt under the menu bar
-            let y = anchor.minY - host.frame.height + 6
+            // chrome has 20pt of transparent shadow padding; land the card 6pt under the menu bar
+            let y = anchor.minY - host.frame.height + 14
             if let vf = (win.screen ?? NSScreen.main)?.frame {
                 x = min(max(x, vf.minX - 16), vf.maxX - host.frame.width + 16)
             }
