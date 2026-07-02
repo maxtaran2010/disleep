@@ -52,25 +52,19 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 Picker("Trigger", selection: $settings.syncRequiresActive) {
-                    Text("Only when actually working").tag(true)
+                    Text("Only when actually working (iTerm2 only)").tag(true)
                     Text("Whenever it's running").tag(false)
                 }
                 .pickerStyle(.radioGroup)
                 .disabled(!settings.autoSyncEnabled)
 
                 if settings.syncRequiresActive {
-                    HStack(spacing: 8) {
-                        Text("CPU threshold")
-                            .font(.system(size: 12))
-                        Slider(value: $settings.cpuThreshold, in: 2...60)
-                            .frame(width: 160)
-                        Text("\(Int(settings.cpuThreshold))%")
-                            .font(.system(size: 12).monospacedDigit())
-                            .foregroundStyle(.secondary)
-                            .frame(width: 36, alignment: .leading)
-                    }
-                    .disabled(!settings.autoSyncEnabled)
-                    .padding(.leading, 2)
+                    Label("Uses the iTerm2 API to detect a busy Claude session. You'll be asked to allow Disleep to control iTerm2 once.",
+                          systemImage: "info.circle")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.leading, 2)
                 }
             }
         }

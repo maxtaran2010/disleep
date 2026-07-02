@@ -18,10 +18,8 @@ final class Settings: ObservableObject {
 
     /// Automatically disable sleep while Claude Code is active, re-enable when idle.
     @Published var autoSyncEnabled: Bool { didSet { persist(); ClaudeSync.shared.refresh() } }
-    /// true = require real CPU activity (actually working); false = just running.
+    /// true = require the session to be actively processing (iTerm2 only); false = just running.
     @Published var syncRequiresActive: Bool { didSet { persist(); ClaudeSync.shared.refresh() } }
-    /// %CPU (single-core normalized) above which a claude process counts as "working".
-    @Published var cpuThreshold: Double { didSet { persist() } }
 
     private let defaults = UserDefaults.standard
     private var loaded = false
@@ -32,7 +30,6 @@ final class Settings: ObservableObject {
         offShortcut = Settings.decode(defaults.data(forKey: "offShortcut"))
         autoSyncEnabled = defaults.bool(forKey: "autoSyncEnabled")
         syncRequiresActive = defaults.object(forKey: "syncRequiresActive") as? Bool ?? true
-        cpuThreshold = defaults.object(forKey: "cpuThreshold") as? Double ?? 10
         loaded = true
     }
 
@@ -67,7 +64,6 @@ final class Settings: ObservableObject {
         defaults.set(Settings.encode(offShortcut), forKey: "offShortcut")
         defaults.set(autoSyncEnabled, forKey: "autoSyncEnabled")
         defaults.set(syncRequiresActive, forKey: "syncRequiresActive")
-        defaults.set(cpuThreshold, forKey: "cpuThreshold")
     }
 
     private static func decode(_ data: Data?) -> Shortcut? {

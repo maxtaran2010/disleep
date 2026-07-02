@@ -24,5 +24,7 @@
 	<true/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Disleep checks iTerm2 for an active Claude Code session to sync sleep.</string>
 </dict>
 </plist>
