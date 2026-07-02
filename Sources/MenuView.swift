@@ -38,22 +38,6 @@ struct MenuView: View {
                     .disabled(model.busy)
             }
 
-            if model.sleepDisabled {
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.orange)
-                    Text("Your Mac will not sleep — even with the lid closed. Watch battery and heat.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.orange.opacity(0.10), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
-            }
-
             Divider()
 
             HStack(spacing: 6) {
