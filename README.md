@@ -18,6 +18,8 @@ Disleep fixes the whole loop:
 - ⚡ **A tray icon you can't ignore.** While sleep is disabled, the menu bar bolt **pulses orange** every 0.6 s. You will not forget your Mac is running hot in a backpack.
 - 🎛️ **Native Apple-style UI.** SwiftUI panel pinned to the tray icon, orange switch, warning card, system-style HUD sliding out from under the menu bar on every toggle.
 - 🛟 **Fail-safe by default.** Quit the app — sleep comes back. App crashes — a detached watchdog restores sleep within ~5 s. You can't end up stuck awake.
+- ⌨️ **Global hotkeys.** Bind your own shortcuts for toggle / force-on / force-off in Settings.
+- 🤖 **Claude Code sync.** Auto-disable sleep while a Claude Code instance is actually working (CPU-based, tunable) and restore normal sleep the moment it goes idle. Or trigger on "just running" — your call.
 
 ## Install
 
@@ -69,7 +71,12 @@ Sources/
 ├── StatusPanel.swift   # custom anchored panel (NSPopover is broken on fullscreen Spaces, we do the math ourselves)
 ├── MenuView.swift      # the panel UI
 ├── HUD.swift           # toggle HUD
-└── Icons.swift         # SF Symbol tray icons
+├── Icons.swift         # SF Symbol tray icons
+├── Settings.swift      # persisted settings + hotkey/sync wiring
+├── Shortcut.swift      # key-code ⇄ display, Carbon modifier mapping
+├── Hotkeys.swift       # global hotkeys via Carbon RegisterEventHotKey
+├── ClaudeSync.swift    # polls `ps` for active claude processes
+└── SettingsWindow.swift# SwiftUI settings window + shortcut recorder
 ```
 
 Regenerate the app icon: `swift Resources/make_icon.swift /tmp/icon.png` and rebuild the `.icns` (see `Resources/`).

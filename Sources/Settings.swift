@@ -1,0 +1,82 @@
+import Combine
+import Foundation
+
+/// Hotkey slot ids shared by Settings and HotkeyManager.
+enum HotkeySlot: UInt32 {
+    case toggle = 1
+    case on = 2
+    case off = 3
+}
+
+/// User-configurable settings, persisted to UserDefaults and applied live.
+final class Settings: ObservableObject {
+    static let shared = Settings()
+
+    @Published var toggleShortcut: Shortcut? { didSet { persist(); rebind(.toggle) } }
+    @Published var onShortcut: Shortcut? { didSet { persist(); rebind(.on) } }
+    @Published var offShortcut: Shortcut? { didSet { persist(); rebind(.off) } }
+
+    /// Automatically disable sleep while Claude Code is active, re-enable when idle.
+    @Published var autoSyncEnabled: Bool { didSet { persist(); ClaudeSync.shared.refresh() } }
+    /// true = require real CPU activity (actually working); false = just running.
+    @Published var syncRequiresActive: Bool { didSet { persist(); ClaudeSync.shared.refresh() } }
+    /// %CPU (single-core normalized) above which a claude process counts as "working".
+    @Published var cpuThreshold: Double { didSet { persist() } }
+
+    private let defaults = UserDefaults.standard
+    private var loaded = false
+
+    private init() {
+        toggleShortcut = Settings.decode(defaults.data(forKey: "toggleShortcut"))
+        onShortcut = Settings.decode(defaults.data(forKey: "onShortcut"))
+        offShortcut = Settings.decode(defaults.data(forKey: "offShortcut"))
+        autoSyncEnabled = defaults.bool(forKey: "autoSyncEnabled")
+        syncRequiresActive = defaults.object(forKey: "syncRequiresActive") as? Bool ?? true
+        cpuThreshold = defaults.object(forKey: "cpuThreshold") as? Double ?? 10
+        loaded = true
+    }
+
+    /// Register all hotkeys once at launch.
+    func installHotkeys() {
+        rebind(.toggle)
+        rebind(.on)
+        rebind(.off)
+    }
+
+    private func rebind(_ slot: HotkeySlot) {
+        let shortcut: Shortcut?
+        let action: () -> Void
+        switch slot {
+        case .toggle:
+            shortcut = toggleShortcut
+            action = { AppController.shared.toggle() }
+        case .on:
+            shortcut = onShortcut
+            action = { AppController.shared.setSleep(disabled: true) }
+        case .off:
+            shortcut = offShortcut
+            action = { AppController.shared.setSleep(disabled: false) }
+        }
+        HotkeyManager.shared.bind(id: slot.rawValue, shortcut: shortcut, action: action)
+    }
+
+    private func persist() {
+        guard loaded else { return }
+        defaults.set(Settings.encode(toggleShortcut), forKey: "toggleShortcut")
+        defaults.set(Settings.encode(onShortcut), forKey: "onShortcut")
+        defaults.set(Settings.encode(offShortcut), forKey: "offShortcut")
+        defaults.set(autoSyncEnabled, forKey: "autoSyncEnabled")
+        defaults.set(syncRequiresActive, forKey: "syncRequiresActive")
+        defaults.set(cpuThreshold, forKey: "cpuThreshold")
+    }
+
+    private static func decode(_ data: Data?) -> Shortcut? {
+        guard let data else { return nil }
+        return try? JSONDecoder().decode(Shortcut.self, from: data)
+    }
+
+    private static func encode(_ shortcut: Shortcut?) -> Data? {
+        guard let shortcut else { return nil }
+        return try? JSONEncoder().encode(shortcut)
+    }
+}

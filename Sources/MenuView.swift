@@ -41,6 +41,16 @@ struct MenuView: View {
             Divider()
 
             HStack(spacing: 6) {
+                Button {
+                    NotificationCenter.default.post(name: .disleepDismissPanel, object: nil)
+                    SettingsWindowController.shared.show()
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Settings")
                 Spacer()
                 Button("Quit") { NSApp.terminate(nil) }
                     .buttonStyle(.plain)

@@ -38,8 +38,18 @@ final class AppController {
     }
 
     func toggle() {
+        apply(target: !model.sleepDisabled)
+    }
+
+    /// Force a specific state (used by hotkeys "on"/"off" and by Claude sync).
+    /// No-op if already there so we don't flash the HUD needlessly.
+    func setSleep(disabled: Bool) {
+        guard disabled != model.sleepDisabled else { return }
+        apply(target: disabled)
+    }
+
+    private func apply(target: Bool) {
         guard !model.busy else { return }
-        let target = !model.sleepDisabled
         ensureAuthorized { ok in
             guard ok else { return }
             self.model.busy = true

@@ -24,6 +24,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .store(in: &cancellables)
 
         AppController.shared.bootstrap()
+        Settings.shared.installHotkeys()
+        ClaudeSync.shared.refresh()
+
+        NotificationCenter.default.addObserver(
+            forName: .disleepDismissPanel, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.panel.close()
+        }
 
         // Menu bar apps have no window — reveal the panel once so it's clear where the app lives.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in

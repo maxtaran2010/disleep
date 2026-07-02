@@ -5,6 +5,10 @@ import SwiftUI
 /// Replacement for NSPopover: a panel anchored manually to the status item's
 /// screen coordinates. NSPopover misplaces itself relative to status items on
 /// fullscreen Spaces, so we own the math instead.
+extension Notification.Name {
+    static let disleepDismissPanel = Notification.Name("disleepDismissPanel")
+}
+
 final class KeyPanel: NSPanel {
     override var canBecomeKey: Bool { true }
 }
