@@ -41,12 +41,6 @@ struct MenuView: View {
             Divider()
 
             HStack(spacing: 6) {
-                Circle()
-                    .fill(model.authorized ? Color.green : Color.red)
-                    .frame(width: 7, height: 7)
-                Text(model.authorized ? "Authorized" : "Not authorized")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
                 Spacer()
                 Button("Quit") { NSApp.terminate(nil) }
                     .buttonStyle(.plain)
