@@ -35,7 +35,7 @@ Optionally: move `build/Disleep.app` to `/Applications` and add it to **Login It
 
 | Action | Result |
 |---|---|
-| Click the 💤 moon in the menu bar | Panel opens |
+| Click the gray ⚡ bolt in the menu bar | Panel opens |
 | Flip the orange switch | Sleep fully disabled, HUD confirms, bolt starts pulsing |
 | Flip it back / hit Quit | Normal sleep restored |
 | Kill it, crash it, whatever | Watchdog restores sleep anyway |

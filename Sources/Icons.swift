@@ -1,7 +1,7 @@
 import AppKit
 
 enum Icons {
-    static let idle = symbol("moon.zzz.fill", color: nil)
+    static let idle = symbol("bolt.fill", color: .systemGray)
     static let activeBright = symbol("bolt.fill", color: .systemOrange)
     static let activeDim = symbol("bolt.fill", color: NSColor.systemOrange.withAlphaComponent(0.35))
 

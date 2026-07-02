@@ -18,9 +18,10 @@ struct MenuView: View {
                     RoundedRectangle(cornerRadius: 9, style: .continuous)
                         .fill(model.sleepDisabled ? Color.orange.opacity(0.18) : Color.primary.opacity(0.08))
                         .frame(width: 36, height: 36)
-                    Image(systemName: model.sleepDisabled ? "bolt.fill" : "moon.zzz.fill")
+                    Image(systemName: "bolt.fill")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(model.sleepDisabled ? Color.orange : Color.secondary)
+                        .foregroundStyle(model.sleepDisabled ? Color.orange : Color(nsColor: .systemGray))
+                        .scaleEffect(model.sleepDisabled ? 1.0 : 0.92)
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Disleep")
@@ -50,6 +51,7 @@ struct MenuView: View {
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.orange.opacity(0.10), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
             }
 
             Divider()
@@ -71,5 +73,6 @@ struct MenuView: View {
         }
         .padding(14)
         .frame(width: 300)
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: model.sleepDisabled)
     }
 }

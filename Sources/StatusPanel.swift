@@ -13,6 +13,8 @@ final class StatusPanelController {
     private var panel: KeyPanel?
     private var monitors: [Any] = []
     private weak var button: NSStatusBarButton?
+    private var anchoredTopY: CGFloat = 0
+    private var anchoredMidX: CGFloat = 0
 
     var isShown: Bool { panel != nil }
 
@@ -24,7 +26,9 @@ final class StatusPanelController {
         close(animated: false)
         self.button = button
 
-        let host = NSHostingView(rootView: PanelChrome { MenuView(model: model) })
+        let host = NSHostingView(rootView: PanelChrome(
+            onSizeChange: { [weak self] size in self?.contentSizeChanged(to: size) }
+        ) { MenuView(model: model) })
         host.setFrameSize(host.fittingSize)
 
         let p = KeyPanel(
@@ -51,7 +55,9 @@ final class StatusPanelController {
                 x = min(max(x, vf.minX - 16), vf.maxX - host.frame.width + 16)
             }
             target = NSPoint(x: x, y: y)
+            anchoredMidX = anchor.midX
         }
+        anchoredTopY = target.y + host.frame.height
 
         // slide down out of the menu bar while fading in
         p.setFrameOrigin(NSPoint(x: target.x, y: target.y + 10))
@@ -92,6 +98,22 @@ final class StatusPanelController {
         }
     }
 
+    /// The warning card appears/disappears on toggle, changing content height.
+    /// Resize the window to match, keeping the top edge pinned under the menu bar.
+    private func contentSizeChanged(to size: CGSize) {
+        guard let p = panel, size.width > 0, size.height > 0 else { return }
+        var f = p.frame
+        guard abs(f.height - size.height) > 0.5 || abs(f.width - size.width) > 0.5 else { return }
+        f.origin.x = anchoredMidX - size.width / 2
+        f.origin.y = anchoredTopY - size.height
+        f.size = size
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.20
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            p.animator().setFrame(f, display: true)
+        }
+    }
+
     func close(animated: Bool = true) {
         monitors.forEach { NSEvent.removeMonitor($0) }
         monitors.removeAll()
@@ -113,7 +135,13 @@ final class StatusPanelController {
     }
 }
 
+private struct PanelSizeKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) { value = nextValue() }
+}
+
 struct PanelChrome<Content: View>: View {
+    var onSizeChange: ((CGSize) -> Void)? = nil
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -125,5 +153,9 @@ struct PanelChrome<Content: View>: View {
             )
             .shadow(color: .black.opacity(0.3), radius: 16, y: 8)
             .padding(20)
+            .background(GeometryReader { geo in
+                Color.clear.preference(key: PanelSizeKey.self, value: geo.size)
+            })
+            .onPreferenceChange(PanelSizeKey.self) { onSizeChange?($0) }
     }
 }

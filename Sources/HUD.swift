@@ -72,9 +72,9 @@ struct HUDView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: sleepDisabled ? "bolt.fill" : "moon.zzz.fill")
+            Image(systemName: "bolt.fill")
                 .font(.system(size: 42, weight: .semibold))
-                .foregroundStyle(sleepDisabled ? Color.orange : Color.secondary)
+                .foregroundStyle(sleepDisabled ? Color.orange : Color(nsColor: .systemGray))
             Text(sleepDisabled ? "Sleep Disabled" : "Sleep Enabled")
                 .font(.system(size: 15, weight: .semibold))
             if sleepDisabled {
