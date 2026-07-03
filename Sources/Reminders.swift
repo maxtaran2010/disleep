@@ -8,9 +8,6 @@ enum ReminderStyle: String, Codable, CaseIterable, Identifiable {
     case notch
     case edgeGlow
     case comet
-    case coffee
-    case eye
-    case flame
     case peeker
     case ticker
     case dvd
@@ -24,9 +21,6 @@ enum ReminderStyle: String, Codable, CaseIterable, Identifiable {
         case .notch: return "Dynamic Notch"
         case .edgeGlow: return "Edge Glow"
         case .comet: return "Lightning Comet"
-        case .coffee: return "Coffee Break"
-        case .eye: return "Insomniac Eye"
-        case .flame: return "Toasty"
         case .peeker: return "Corner Peeker"
         case .ticker: return "News Ticker"
         case .dvd: return "DVD Bounce"
@@ -92,18 +86,6 @@ final class ReminderEngine {
             rect = f
             view = AnyView(CometView())
             duration = 1.8
-        case .coffee:
-            rect = NSRect(x: v.maxX - 210, y: v.minY + 20, width: 200, height: 220)
-            view = AnyView(CoffeeView())
-            duration = 3.6
-        case .eye:
-            rect = NSRect(x: v.maxX - 210, y: v.minY + 20, width: 200, height: 180)
-            view = AnyView(InsomniacEyeView())
-            duration = 3.8
-        case .flame:
-            rect = NSRect(x: v.minX + 20, y: v.minY + 20, width: 190, height: 170)
-            view = AnyView(FlameView())
-            duration = 3.2
         case .peeker:
             rect = NSRect(x: f.maxX - 140, y: f.midY - 80, width: 140, height: 160)
             view = AnyView(PeekerView())
@@ -321,138 +303,7 @@ private struct CometView: View {
     }
 }
 
-// MARK: - 4. Coffee Break
-
-/// A coffee cup slides into the corner and quietly steams. Still brewing.
-private struct CoffeeView: View {
-    @StateObject private var s = AnimState() // flagA = shown
-    private let start = Date()
-
-    var body: some View {
-        VStack(spacing: 6) {
-            TimelineView(.animation) { ctx in
-                let t = ctx.date.timeIntervalSince(start)
-                HStack(spacing: 12) {
-                    wisp(t: t, index: 0)
-                    wisp(t: t, index: 1)
-                    wisp(t: t, index: 2)
-                }
-                .frame(height: 48, alignment: .bottom)
-            }
-            Image(systemName: "cup.and.saucer.fill")
-                .font(.system(size: 50))
-                .foregroundStyle(Color.orange)
-            Text("still brewing")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
-        }
-        .padding(20)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .opacity(s.flagA ? 1 : 0)
-        .offset(y: s.flagA ? 0 : 40)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .onAppear {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { s.flagA = true }
-        }
-    }
-
-    private func wisp(t: TimeInterval, index: Int) -> some View {
-        let phase = (t * 0.45 + Double(index) * 0.33).truncatingRemainder(dividingBy: 1)
-        let dx = CGFloat(sin(phase * 2 * .pi + Double(index)) * 4)
-        let dy = CGFloat(-phase * 32)
-        return Capsule()
-            .fill(Color.white.opacity(0.85))
-            .frame(width: 5, height: 16)
-            .offset(x: dx, y: dy)
-            .opacity(sin(phase * .pi))
-    }
-}
-
-// MARK: - 5. Insomniac Eye
-
-/// An eye dozes off, snaps back open and looks around. It's watching you.
-private struct InsomniacEyeView: View {
-    @StateObject private var s = AnimState() // flagA = shown, x = lid 0…1, y = pupil offset
-
-    var body: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Ellipse().fill(Color.white)
-                Circle()
-                    .fill(Color.black)
-                    .frame(width: 26, height: 26)
-                    .offset(x: s.y)
-                VStack(spacing: 0) {
-                    Rectangle()
-                        .fill(Color(nsColor: .darkGray))
-                        .frame(height: 64 * s.x)
-                    Spacer(minLength: 0)
-                }
-            }
-            .frame(width: 100, height: 64)
-            .clipShape(Ellipse())
-            .overlay(Ellipse().strokeBorder(Color.black.opacity(0.5), lineWidth: 2))
-            Text("no napping")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
-        }
-        .padding(20)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .opacity(s.flagA ? 1 : 0)
-        .scaleEffect(s.flagA ? 1 : 0.8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .onAppear {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { s.flagA = true }
-            withAnimation(.easeIn(duration: 1.1).delay(0.3)) { s.x = 1 } // dozing off…
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
-                withAnimation(.spring(response: 0.18, dampingFraction: 0.6)) { s.x = 0 } // snap!
-            }
-            for (i, look) in [CGFloat(-20), 20, 0].enumerated() {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.1 + Double(i) * 0.45) {
-                    withAnimation(.easeInOut(duration: 0.25)) { s.y = look }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - 6. Toasty
-
-/// A flickering flame in the corner. Your Mac is running hot, remember?
-private struct FlameView: View {
-    @StateObject private var s = AnimState() // flagA = shown
-    private let start = Date()
-
-    var body: some View {
-        VStack(spacing: 8) {
-            TimelineView(.animation) { ctx in
-                let t = ctx.date.timeIntervalSince(start)
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 52))
-                    .foregroundStyle(
-                        LinearGradient(colors: [.red, .orange, .yellow],
-                                       startPoint: .top, endPoint: .bottom)
-                    )
-                    .scaleEffect(x: 1 + 0.06 * sin(t * 13), y: 1 + 0.09 * sin(t * 17 + 1), anchor: .bottom)
-                    .rotationEffect(.degrees(2.5 * sin(t * 9)))
-                    .shadow(color: .orange.opacity(0.7), radius: 10)
-            }
-            Text("running hot")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
-        }
-        .padding(20)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .opacity(s.flagA ? 1 : 0)
-        .offset(y: s.flagA ? 0 : 40)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .onAppear {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { s.flagA = true }
-        }
-    }
-}
-
-// MARK: - 7. Corner Peeker
+// MARK: - 4. Corner Peeker
 
 /// A bolt with googly eyes peeks out of the screen edge, wiggles, hides.
 private struct PeekerView: View {
@@ -497,7 +348,7 @@ private struct GooglyEye: View {
     }
 }
 
-// MARK: - 8. News Ticker
+// MARK: - 5. News Ticker
 
 /// A breaking-news bar crawls along the bottom edge. This just in: no sleep.
 private struct TickerView: View {
@@ -522,7 +373,7 @@ private struct TickerView: View {
     }
 }
 
-// MARK: - 9. DVD Bounce
+// MARK: - 6. DVD Bounce
 
 /// The screensaver classic: a DISLEEP logo ricochets around, recoloring on
 /// every bounce. It never hits the corner. It never will.
@@ -563,7 +414,7 @@ private struct DVDBounceView: View {
     }
 }
 
-// MARK: - 10. Heartbeat
+// MARK: - 7. Heartbeat
 
 /// An EKG pulse draws itself across the bottom of the screen. Alive and awake.
 private struct HeartbeatView: View {

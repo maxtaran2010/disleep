@@ -27,6 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Settings.shared.installHotkeys()
         ClaudeSync.shared.refresh()
         ReminderEngine.shared.refresh()
+        ThermalWatch.shared.start()
 
         NotificationCenter.default.addObserver(
             forName: .disleepDismissPanel, object: nil, queue: .main
