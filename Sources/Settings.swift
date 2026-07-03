@@ -57,10 +57,10 @@ final class Settings: ObservableObject {
             action = { AppController.shared.toggle() }
         case .on:
             shortcut = onShortcut
-            action = { AppController.shared.setSleep(disabled: true) }
+            action = { AppController.shared.setSleepManually(disabled: true) }
         case .off:
             shortcut = offShortcut
-            action = { AppController.shared.setSleep(disabled: false) }
+            action = { AppController.shared.setSleepManually(disabled: false) }
         }
         HotkeyManager.shared.bind(id: slot.rawValue, shortcut: shortcut, action: action)
     }

@@ -9,10 +9,31 @@ final class ClaudeSync {
     private var timer: Timer?
     private let interval: TimeInterval = 4
 
+    /// Idle debounce: sleep is disabled the moment Claude looks active, but
+    /// re-enabled only after this long of *continuous* idle. iTerm2's
+    /// "is processing" flag flickers off during quiet stretches of a live turn
+    /// (long tool calls, permission prompts, stream stalls); with the lid
+    /// closed a single false-idle poll would put the Mac to sleep and kill the
+    /// session's sockets.
+    private let idleGrace: TimeInterval = 60
+    private var idleSince: Date?
+
+    /// Set when the user manually re-enabled sleep while sync was active:
+    /// sync must not fight the user, so it stops disabling sleep until the
+    /// user manually flips it back on (or toggles the sync setting).
+    private var manualHold = false
+
+    /// Called on every manual toggle/hotkey change so sync respects it.
+    func noteManualChange(sleepDisabled: Bool) {
+        manualHold = !sleepDisabled
+    }
+
     /// Start or stop polling to match the current setting.
     func refresh() {
         timer?.invalidate()
         timer = nil
+        idleSince = nil
+        manualHold = false
         guard Settings.shared.autoSyncEnabled else { return }
         poll()
         let t = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
@@ -27,15 +48,31 @@ final class ClaudeSync {
             // NSAppleScript must run on the main thread.
             let active = ClaudeSync.claudeWorkingInITerm()
             guard Settings.shared.autoSyncEnabled else { return }
-            AppController.shared.setSleep(disabled: active)
+            apply(active: active)
         } else {
             DispatchQueue.global().async {
                 let active = ClaudeSync.claudeRunning()
                 DispatchQueue.main.async {
                     guard Settings.shared.autoSyncEnabled else { return }
-                    AppController.shared.setSleep(disabled: active)
+                    self.apply(active: active)
                 }
             }
+        }
+    }
+
+    /// Active → disable sleep immediately. Idle → re-enable sleep only after
+    /// `idleGrace` of uninterrupted idle.
+    private func apply(active: Bool) {
+        if active {
+            idleSince = nil
+            guard !manualHold else { return }
+            AppController.shared.setSleep(disabled: true)
+            return
+        }
+        let since = idleSince ?? Date()
+        idleSince = since
+        if Date().timeIntervalSince(since) >= idleGrace {
+            AppController.shared.setSleep(disabled: false)
         }
     }
 

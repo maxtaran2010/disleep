@@ -37,11 +37,21 @@ final class AppController {
         }
     }
 
+    /// Manual toggle (menu switch, toggle hotkey).
     func toggle() {
-        apply(target: !model.sleepDisabled)
+        let target = !model.sleepDisabled
+        ClaudeSync.shared.noteManualChange(sleepDisabled: target)
+        apply(target: target)
     }
 
-    /// Force a specific state (used by hotkeys "on"/"off" and by Claude sync).
+    /// Manual force on/off (hotkeys). Unlike sync's setSleep, records the
+    /// user's intent so Claude sync doesn't override it.
+    func setSleepManually(disabled: Bool) {
+        ClaudeSync.shared.noteManualChange(sleepDisabled: disabled)
+        setSleep(disabled: disabled)
+    }
+
+    /// Force a specific state without recording manual intent (Claude sync).
     /// No-op if already there so we don't flash the HUD needlessly.
     func setSleep(disabled: Bool) {
         guard disabled != model.sleepDisabled else { return }
