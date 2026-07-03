@@ -67,6 +67,38 @@ struct SettingsView: View {
                         .padding(.leading, 2)
                 }
             }
+
+            Divider()
+
+            section("Awake Reminders") {
+                Text("While sleep is disabled, periodically play a little animation so you can't forget. Never touches the menu bar.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Picker("Animation", selection: $settings.reminderStyle) {
+                    ForEach(ReminderStyle.allCases) { style in
+                        Text(style.displayName).tag(style)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Picker("Repeat every", selection: $settings.reminderInterval) {
+                    Text("15 seconds").tag(15.0)
+                    Text("30 seconds").tag(30.0)
+                    Text("1 minute").tag(60.0)
+                    Text("2 minutes").tag(120.0)
+                    Text("5 minutes").tag(300.0)
+                }
+                .pickerStyle(.menu)
+                .disabled(settings.reminderStyle == .off)
+
+                HStack {
+                    Spacer()
+                    Button("Preview") { ReminderEngine.shared.preview() }
+                        .disabled(settings.reminderStyle == .off)
+                }
+            }
         }
         .padding(24)
         .frame(width: 420)

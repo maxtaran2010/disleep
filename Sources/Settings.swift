@@ -21,6 +21,11 @@ final class Settings: ObservableObject {
     /// true = require the session to be actively processing (iTerm2 only); false = just running.
     @Published var syncRequiresActive: Bool { didSet { persist(); ClaudeSync.shared.refresh() } }
 
+    /// Playful periodic animation while sleep is disabled (.off = none).
+    @Published var reminderStyle: ReminderStyle { didSet { persist(); ReminderEngine.shared.refresh() } }
+    /// Seconds between reminder animations.
+    @Published var reminderInterval: TimeInterval { didSet { persist(); ReminderEngine.shared.refresh() } }
+
     private let defaults = UserDefaults.standard
     private var loaded = false
 
@@ -30,6 +35,9 @@ final class Settings: ObservableObject {
         offShortcut = Settings.decode(defaults.data(forKey: "offShortcut"))
         autoSyncEnabled = defaults.bool(forKey: "autoSyncEnabled")
         syncRequiresActive = defaults.object(forKey: "syncRequiresActive") as? Bool ?? true
+        reminderStyle = ReminderStyle(rawValue: defaults.string(forKey: "reminderStyle") ?? "") ?? .notch
+        let interval = defaults.double(forKey: "reminderInterval")
+        reminderInterval = interval > 0 ? interval : 60
         loaded = true
     }
 
@@ -64,6 +72,8 @@ final class Settings: ObservableObject {
         defaults.set(Settings.encode(offShortcut), forKey: "offShortcut")
         defaults.set(autoSyncEnabled, forKey: "autoSyncEnabled")
         defaults.set(syncRequiresActive, forKey: "syncRequiresActive")
+        defaults.set(reminderStyle.rawValue, forKey: "reminderStyle")
+        defaults.set(reminderInterval, forKey: "reminderInterval")
     }
 
     private static func decode(_ data: Data?) -> Shortcut? {

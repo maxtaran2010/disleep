@@ -19,6 +19,7 @@ Disleep fixes the whole loop:
 - 🎛️ **Native Apple-style UI.** SwiftUI panel pinned to the tray icon, orange switch, warning card, system-style HUD sliding out from under the menu bar on every toggle.
 - 🛟 **Fail-safe by default.** Quit the app — sleep comes back. App crashes — a detached watchdog restores sleep within ~5 s. You can't end up stuck awake.
 - ⌨️ **Global hotkeys.** Bind your own shortcuts for toggle / force-on / force-off in Settings.
+- 🎪 **Awake reminders.** Pick one of 10 playful overlay animations (Dynamic-Island-style notch expansion, edge glow, DVD bounce, googly-eyed corner peeker…) that plays every N seconds while sleep is disabled. Style + frequency in Settings.
 - 🤖 **Claude Code sync.** Auto-disable sleep while a Claude Code instance is actually working and restore normal sleep the moment it goes idle. "Actually working" is detected via the **iTerm2** scripting API (a busy session on a tty running `claude`); a terminal-agnostic "whenever it's running" mode is also available.
 
 ## Install
@@ -76,6 +77,7 @@ Sources/
 ├── Shortcut.swift      # key-code ⇄ display, Carbon modifier mapping
 ├── Hotkeys.swift       # global hotkeys via Carbon RegisterEventHotKey
 ├── ClaudeSync.swift    # polls `ps` for active claude processes
+├── Reminders.swift     # 10 "still awake" overlay animations + engine
 └── SettingsWindow.swift# SwiftUI settings window + shortcut recorder
 ```
 
