@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3 — 2026-07-03
+
+### Fixed
+- 🤖 **Claude sync no longer kills lid-closed sessions.** In "only when actually working" mode, iTerm2's *processing* flag flickers off during quiet stretches of a live turn (long tool calls, permission prompts, stream stalls). A single 4-second idle poll was enough to re-enable sleep — with the lid closed the Mac dozed off within seconds and Claude Code died with `socket disconnected`. Sleep is now re-enabled only after **60 seconds of continuous idle**; going active still disables sleep instantly.
+- ✋ **Manual off now sticks.** Flipping the switch (or hitting the force-sleep hotkey) while Claude sync was holding sleep off used to get overridden on the next poll. Now a manual off suppresses sync until you manually turn stay-awake back on (or toggle the sync setting).
+
 ## v1.2 — 2026-07-03
 
 ### Added
